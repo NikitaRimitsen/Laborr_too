@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace Laborr_too
 {
     public partial class Form1 : Form
     {
+        Label dljameshe = new Label();
+        PictureBox osnova = new PictureBox();
 
 
         public Form1()
@@ -22,10 +26,12 @@ namespace Laborr_too
             ToolStripMenuItem File = new ToolStripMenuItem("File");
             ToolStripMenuItem New = new ToolStripMenuItem("New");
             New.ShortcutKeys = Keys.Control | Keys.N;
+            New.Click += New_Click;
             ToolStripMenuItem Open = new ToolStripMenuItem("Open");
             Open.ShortcutKeys = Keys.F3;
             ToolStripMenuItem Save = new ToolStripMenuItem("Save");
             Save.ShortcutKeys = Keys.F2;
+            Save.Click += Save_Click;
             ToolStripMenuItem Exit = new ToolStripMenuItem("Exit");
             Exit.ShortcutKeys = Keys.Alt | Keys.X;
             Exit.Click += Exit_Click;
@@ -83,12 +89,14 @@ namespace Laborr_too
             ToolStripButton Savebtn = new ToolStripButton();
             Savebtn.Image = Image.FromFile(@"..\..\Pilti\Save.png");
             Savebtn.Margin = new Padding(0, 0, 0, 30);
+            Savebtn.Click += Savebtn_Click;
             ToolStripButton Colorbtn = new ToolStripButton();
             Colorbtn.Image = Image.FromFile(@"..\..\Pilti\Palitra.png");
             Colorbtn.Margin = new Padding(0, 0, 0, 30);
             ToolStripButton Exitbtn = new ToolStripButton();
             Exitbtn.Image = Image.FromFile(@"..\..\Pilti\Vexod.png");
             Exitbtn.Margin = new Padding(0, 0, 0, 30);
+            Exitbtn.Click += Exitbtn_Click;
 
             bokovoemenu.Items.Add(Newbtn);
             bokovoemenu.Items.Add(Openbtn);
@@ -98,33 +106,137 @@ namespace Laborr_too
 
             //---------------------Panel-----------------
             Panel panelka = new Panel();
-            panelka.Location = new System.Drawing.Point(80, 600);
-            panelka.Name = "Panel1";
-            panelka.Size = new System.Drawing.Size(50, 200);
+            panelka.Location = new System.Drawing.Point(150, 400);
+            panelka.Size = new System.Drawing.Size(100, 500);
 
 
-            //--------------TrackBar
+            //--------------TrackBar--------------
+            TrackBar tudasuda = new TrackBar();
+            tudasuda.Orientation = Orientation.Horizontal;
+            tudasuda.Minimum = 0;
+            tudasuda.Maximum = 100;
+            tudasuda.Value = 40;
+            tudasuda.Location = new System.Drawing.Point(750, 600);
+            tudasuda.Width = 250;
+            tudasuda.Height = 100;
+
+            //---------------Label-----------------      
+            dljameshe.Location = new System.Drawing.Point(150, 600);
+            dljameshe.Text = "X: 0 ;  Y: 0";
+
+
             //-------Pilti, tocnee iconko dlja menu------------------
             New.Image = Image.FromFile(@"..\..\Pilti\karandash.ico");
 
+            //----------------PictureBox--------------
+            
+            osnova.Location = new System.Drawing.Point(107, 34);
+            osnova.Width = 950;
+            osnova.Height = 551;
+            osnova.ImageLocation = (@"..\..\Pilti\fon.png");
+
+            //--------------------Bitmap---------------
+            Bitmap pic = new Bitmap(950, 551);
+            osnova.Image = pic;
+            
             //---------Forma-------
             this.Controls.Add(menu);
             this.Controls.Add(bokovoemenu);
-            this.Controls.Add(panelka);
+            //this.Controls.Add(panelka);
+            this.Controls.Add(tudasuda);
+            this.Controls.Add(dljameshe);
+            this.Click += Form1_Click;
+            
+            MouseMove += Form1_MouseMove1;
 
-            //this.Icon = Properties.Resources.karandash;
+
+             this.Icon = Properties.Resources.iconkaglavnaja;
             //this.BackColor = Color.Gainsboro;
+            this.Text = "Pildiredaktor";
             this.Height = 700;//свойство высота формы
             this.Width = 1100;
 
         }
 
+        
+
+        public void Savepilti()
+        {
+            SaveFileDialog SaveDlg = new SaveFileDialog();
+            SaveDlg.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|GIF Image|*.gif|PNG Image|*png";
+            SaveDlg.Title = "Save an Image  File";
+            SaveDlg.FilterIndex = 4;
+            SaveDlg.ShowDialog();
+            if (SaveDlg.FileName != "")
+            {
+                System.IO.FileStream fs = (System.IO.FileStream)SaveDlg.OpenFile();
+
+                switch (SaveDlg.FilterIndex)
+                {
+                    case 1:
+                        this.osnova.Image.Save(fs, ImageFormat.Jpeg);
+                        break;
+                    case 2:
+                        this.osnova.Image.Save(fs, ImageFormat.Bmp);
+                        break;
+                    case 3:
+                        this.osnova.Image.Save(fs, ImageFormat.Gif);
+                        break;
+                    case 4:
+                        this.osnova.Image.Save(fs, ImageFormat.Png);
+                        break;
+                }
+                fs.Close();
+            }
+        }
+
+        
+        //-------------Save---------------
+        private void Save_Click(object sender, EventArgs e)
+        {
+            Savepilti();
+        }       
+        private void Savebtn_Click(object sender, EventArgs e)
+        {
+            Savepilti();
+        }
+        //---------------------------------
+        private void Form1_Click(object sender, EventArgs e)
+        {
+            if (osnova.Image == null)
+            {
+                MessageBox.Show("Сначала создайте новый файл!");
+                return;
+            }
+
+        }
+
+        public void New_Click(object sender, EventArgs e)
+        {
+            this.Controls.Add(osnova);
+        }
+
+        private void Form1_MouseMove1(object sender, MouseEventArgs e)
+        {
+            dljameshe.Text = e.X.ToString() + " " + e.Y.ToString();
+
+        }
+        //-----------------------Exit----------------
         private void Exit_Click(object sender, EventArgs e)
         {
             Environment.Exit(0);
         }
+        private void Exitbtn_Click(object sender, EventArgs e)
+        {
+            Environment.Exit(0);
+        }
+        //-------------------------------------------
+        public void Form1_MouseMove(object sender, MouseEventArgs e)
+        {
+            int CursorX = Cursor.Position.X;
+            int CursorY = Cursor.Position.Y;
 
-
-
+            dljameshe.Text = "X: " + CursorX.ToString() + "; Y: " + CursorY.ToString();
+        }
     }
 }

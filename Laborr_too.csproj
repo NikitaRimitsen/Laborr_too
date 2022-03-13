@@ -81,6 +81,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Pilti\fon.png" />
+    <Content Include="Pilti\iconkaglavnaja.ico" />
     <Content Include="Pilti\karandash.ico" />
     <Content Include="Pilti\New.png" />
     <Content Include="Pilti\Open.png" />

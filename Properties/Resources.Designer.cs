@@ -63,9 +63,9 @@ namespace Laborr_too.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Icon, аналогичного (Значок).
         /// </summary>
-        internal static System.Drawing.Icon karandash {
+        internal static System.Drawing.Icon iconkaglavnaja {
             get {
-                object obj = ResourceManager.GetObject("karandash", resourceCulture);
+                object obj = ResourceManager.GetObject("iconkaglavnaja", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
