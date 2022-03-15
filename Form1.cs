@@ -82,7 +82,8 @@ namespace Laborr_too
 
             ToolStripButton Newbtn = new ToolStripButton();
             Newbtn.Image = Image.FromFile(@"..\..\Pilti\New.png");
-            Newbtn.Margin = new Padding(0, 0, 0, 30);          
+            Newbtn.Margin = new Padding(0, 0, 0, 30);
+            Newbtn.Click += Newbtn_Click;
             ToolStripButton Openbtn = new ToolStripButton();
             Openbtn.Image = Image.FromFile(@"..\..\Pilti\Open.png");
             Openbtn.Margin = new Padding(0, 0, 0, 30);
@@ -129,11 +130,8 @@ namespace Laborr_too
             New.Image = Image.FromFile(@"..\..\Pilti\karandash.ico");
 
             //----------------PictureBox--------------
+
             
-            osnova.Location = new System.Drawing.Point(107, 34);
-            osnova.Width = 950;
-            osnova.Height = 551;
-            osnova.ImageLocation = (@"..\..\Pilti\fon.png");
 
             //--------------------Bitmap---------------
             Bitmap pic = new Bitmap(950, 551);
@@ -145,9 +143,9 @@ namespace Laborr_too
             //this.Controls.Add(panelka);
             this.Controls.Add(tudasuda);
             this.Controls.Add(dljameshe);
-            this.Click += Form1_Click;
             
             MouseMove += Form1_MouseMove1;
+            this.MouseDown += Osnova_MouseDown;
 
 
              this.Icon = Properties.Resources.iconkaglavnaja;
@@ -159,6 +157,15 @@ namespace Laborr_too
         }
 
         
+
+        private void Osnova_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (osnova.Image == null)
+            {
+                MessageBox.Show("Сначала создайте новый файл!");
+                return;
+            }
+        }
 
         public void Savepilti()
         {
@@ -200,22 +207,44 @@ namespace Laborr_too
         {
             Savepilti();
         }
-        //---------------------------------
-        private void Form1_Click(object sender, EventArgs e)
+        //---------------------------------New----------------
+        private void Newbtn_Click(object sender, EventArgs e)
         {
-            if (osnova.Image == null)
+            osnova.Location = new System.Drawing.Point(107, 34);
+            osnova.Width = 950;
+            osnova.Height = 551;
+            osnova.ImageLocation = (@"..\..\Pilti\fon.png");
+            this.Controls.Add(osnova);
+            if (osnova.Image != null)
             {
-                MessageBox.Show("Сначала создайте новый файл!");
-                return;
+                var result = MessageBox.Show("Сохранить текущее изображение перед созданием нового рисунка?", "Предупреждение", MessageBoxButtons.YesNoCancel);
+                switch (result)
+                {
+                    case DialogResult.No: break;
+                    case DialogResult.Yes: Savebtn_Click(sender, e); break;
+                    case DialogResult.Cancel: return;
+                }
             }
-
         }
-
         public void New_Click(object sender, EventArgs e)
         {
+            osnova.Location = new System.Drawing.Point(107, 34);
+            osnova.Width = 950;
+            osnova.Height = 551;
+            osnova.ImageLocation = (@"..\..\Pilti\fon.png");
             this.Controls.Add(osnova);
+            if (osnova.Image != null)
+            {
+                var result = MessageBox.Show("Сохранить текущее изображение перед созданием нового рисунка?", "Предупреждение", MessageBoxButtons.YesNoCancel);
+                switch (result)
+                {
+                    case DialogResult.No: break;
+                    case DialogResult.Yes: Savebtn_Click(sender, e); break;
+                    case DialogResult.Cancel: return;
+                }
+            }
         }
-
+        //------------------------------------------------------
         private void Form1_MouseMove1(object sender, MouseEventArgs e)
         {
             dljameshe.Text = e.X.ToString() + " " + e.Y.ToString();
