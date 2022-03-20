@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
@@ -16,31 +17,57 @@ namespace Laborr_too
     {
         Label dljameshe = new Label();
         PictureBox osnova = new PictureBox();
+        bool drawing;
+        GraphicsPath currentPath;
+        Point oldLocation;
+        Pen currentPen;
 
 
         public Form1()
         {
             InitializeComponent();
-            MenuStrip menu = new MenuStrip();
-            //-------------Help---------------
-            ToolStripMenuItem File = new ToolStripMenuItem("File");
-            ToolStripMenuItem New = new ToolStripMenuItem("New");
-            New.ShortcutKeys = Keys.Control | Keys.N;
-            New.Click += New_Click;
-            ToolStripMenuItem Open = new ToolStripMenuItem("Open");
-            Open.ShortcutKeys = Keys.F3;
-            ToolStripMenuItem Save = new ToolStripMenuItem("Save");
-            Save.ShortcutKeys = Keys.F2;
+            drawing = false;
+            currentPen = new Pen(Color.Black);
+
+            MainMenu menu = new MainMenu();
+            //-------------File---------------
+            MenuItem File = new MenuItem("File");        
+            File.MenuItems.Add("New", new EventHandler(New_Click)).Shortcut = Shortcut.CtrlN;
+            File.MenuItems.Add("Open", new EventHandler(Open_Click)).Shortcut = Shortcut.F3;
+            File.MenuItems.Add("Save", new EventHandler(Save_Click)).Shortcut = Shortcut.F2;
+            File.MenuItems.Add("Exit", new EventHandler(Exit_Click)).Shortcut = Shortcut.CtrlX;
+            MenuItem Edit = new MenuItem("Edit");
+            Edit.MenuItems.Add("Undo").Shortcut = Shortcut.CtrlZ;
+            Edit.MenuItems.Add("Reno").Shortcut = Shortcut.CtrlShiftZ;
+            MenuItem Pen = new MenuItem("Pen") { Checked = true };
+            MenuItem Style = new MenuItem("Style") { Checked = true };
+            MenuItem Color_ = new MenuItem("Color");
+            MenuItem Solid = new MenuItem("Solid") { Checked = true };
+            MenuItem Dot = new MenuItem("Dot");
+            MenuItem DashDotHot = new MenuItem("DashDotHot");
+
+            MenuItem Help = new MenuItem("Help");
+            Help.MenuItems.Add("About", new EventHandler(About_Click)).Shortcut = Shortcut.F1;
+            menu.MenuItems.Add(File);
+            menu.MenuItems.Add(Edit);
+            Edit.MenuItems.Add(Pen);
+            Pen.MenuItems.Add(Style);
+            Pen.MenuItems.Add(Color_);
+            Style.MenuItems.Add(Solid);
+            Style.MenuItems.Add(Dot);
+            Style.MenuItems.Add(DashDotHot);
+
+            menu.MenuItems.Add(Help);
+            /*MenuItem Open = new MenuItem("Open");
+            Open.Click += Open_Click;
+            MenuItem Save = new MenuItem("Save");
             Save.Click += Save_Click;
-            ToolStripMenuItem Exit = new ToolStripMenuItem("Exit");
-            Exit.ShortcutKeys = Keys.Alt | Keys.X;
+            MenuItem Exit = new MenuItem("Exit");
             Exit.Click += Exit_Click;
             // -------------------Edit----------
             ToolStripMenuItem Edit = new ToolStripMenuItem("Edit");
             ToolStripMenuItem Undo = new ToolStripMenuItem("Undo");
-            Undo.ShortcutKeys = Keys.Control | Keys.Z;
             ToolStripMenuItem Reno = new ToolStripMenuItem("Reno");
-            Reno.ShortcutKeys = Keys.Control | Keys.Shift | Keys.Z;
             ToolStripMenuItem Pen = new ToolStripMenuItem("Pen") { Checked = true };
             ToolStripMenuItem Style = new ToolStripMenuItem("Style") { Checked = true };
             ToolStripMenuItem Color = new ToolStripMenuItem("Color");
@@ -51,13 +78,14 @@ namespace Laborr_too
             ToolStripMenuItem Help = new ToolStripMenuItem("Help");
             ToolStripMenuItem About = new ToolStripMenuItem("About");
             About.ShortcutKeys = Keys.F1;
+            About.Click += About_Click;
             // -------------------File----------
-            File.DropDownItems.Add(New);
+            /*File.DropDownItems.Add(New);
             File.DropDownItems.Add(Open);
             File.DropDownItems.Add(Save);
-            File.DropDownItems.Add(Exit);
+            File.DropDownItems.Add(Exit);*/
             // -------------------Edit----------
-            Edit.DropDownItems.Add(Undo);
+            /*Edit.DropDownItems.Add(Undo);
             Edit.DropDownItems.Add(Reno);
             Edit.DropDownItems.Add(Pen);
             Pen.DropDownItems.Add(Style);
@@ -66,12 +94,12 @@ namespace Laborr_too
             Style.DropDownItems.Add(Dot);
             Style.DropDownItems.Add(DashDotDot);
             //-------------Help---------------
-            Help.DropDownItems.Add(About);
+            Help.DropDownItems.Add(About);*/
 
             //-------Dobavlenie_v_menu-------
-            menu.Items.Add(File);
+            /*menu.Items.Add(File);
             menu.Items.Add(Edit);
-            menu.Items.Add(Help);
+            menu.Items.Add(Help);*/
 
             //---------Bokovoe_menu--------------
             ToolStrip bokovoemenu = new ToolStrip();
@@ -87,6 +115,7 @@ namespace Laborr_too
             ToolStripButton Openbtn = new ToolStripButton();
             Openbtn.Image = Image.FromFile(@"..\..\Pilti\Open.png");
             Openbtn.Margin = new Padding(0, 0, 0, 30);
+            Openbtn.Click += Openbtn_Click;
             ToolStripButton Savebtn = new ToolStripButton();
             Savebtn.Image = Image.FromFile(@"..\..\Pilti\Save.png");
             Savebtn.Margin = new Padding(0, 0, 0, 30);
@@ -109,7 +138,10 @@ namespace Laborr_too
             Panel panelka = new Panel();
             panelka.Location = new System.Drawing.Point(150, 400);
             panelka.Size = new System.Drawing.Size(100, 500);
-
+            //-------------------------Panel-2-----------------
+            Panel nazad = new Panel();
+            nazad.Location = new System.Drawing.Point(100, 32);
+            nazad.Size = new System.Drawing.Size(1000, 600);
 
             //--------------TrackBar--------------
             TrackBar tudasuda = new TrackBar();
@@ -117,47 +149,114 @@ namespace Laborr_too
             tudasuda.Minimum = 0;
             tudasuda.Maximum = 100;
             tudasuda.Value = 40;
-            tudasuda.Location = new System.Drawing.Point(750, 600);
+            tudasuda.Location = new System.Drawing.Point(750, 650);
             tudasuda.Width = 250;
             tudasuda.Height = 100;
 
             //---------------Label-----------------      
-            dljameshe.Location = new System.Drawing.Point(150, 600);
+            dljameshe.Location = new System.Drawing.Point(150, 650);
             dljameshe.Text = "X: 0 ;  Y: 0";
 
 
             //-------Pilti, tocnee iconko dlja menu------------------
-            New.Image = Image.FromFile(@"..\..\Pilti\karandash.ico");
+            //New.Image = Image.FromFile(@"..\..\Pilti\karandash.ico");
 
             //----------------PictureBox--------------
-
             
+
+
 
             //--------------------Bitmap---------------
             Bitmap pic = new Bitmap(950, 551);
             osnova.Image = pic;
-            
+
             //---------Forma-------
-            this.Controls.Add(menu);
+            this.Menu = menu;
+
+
+
+
+            //this.Controls.Add(menu);
             this.Controls.Add(bokovoemenu);
             //this.Controls.Add(panelka);
+            this.Controls.Add(nazad);
+            nazad.Controls.Add(osnova);
             this.Controls.Add(tudasuda);
             this.Controls.Add(dljameshe);
-            
-            MouseMove += Form1_MouseMove1;
+
+            osnova.MouseMove += Form1_MouseMove1;
+            osnova.MouseDown += Osnova_MouseDown1;
+            osnova.MouseUp += Osnova_MouseUp;
             this.MouseDown += Osnova_MouseDown;
 
 
-             this.Icon = Properties.Resources.iconkaglavnaja;
+            this.Icon = Properties.Resources.iconkaglavnaja;
             //this.BackColor = Color.Gainsboro;
             this.Text = "Pildiredaktor";
-            this.Height = 700;//свойство высота формы
-            this.Width = 1100;
+            this.Height = 750;//свойство высота формы
+            this.Width = 1200;
 
         }
 
-        
+        private void Osnova_MouseUp(object sender, MouseEventArgs e)
+        {
+            drawing = false;
+            try
+            {
+                currentPath.Dispose();
+            }
+            catch { };
+        }
 
+        private void Osnova_MouseDown1(object sender, MouseEventArgs e)
+        {
+            if (osnova.Image == null)
+            {
+                MessageBox.Show("Сначала создайте новый файл!");
+            }
+            if (e.Button == MouseButtons.Left)
+            {
+                drawing = true;
+                oldLocation = e.Location;
+                currentPath = new GraphicsPath();
+            }
+        }
+
+        private void About_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Version Programm: 1.17\nDeveloper: Rimitsen Nikita\nDesigner: Rimitsen Nikita\nTester: Rimitsen Nikita", "About");
+        }
+
+        //-----------------------Функции------------------------------
+        private void Open_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog OP = new OpenFileDialog();
+            OP.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|GIF Image|*.gif|PNG Image|*png";
+            OP.Title = "Open an Image File";
+            OP.FilterIndex = 1;
+
+            if (OP.ShowDialog() != DialogResult.Cancel)
+            {
+                osnova.Load(OP.FileName);
+                osnova.AutoSize = true;
+            }
+        }
+        private void Openbtn_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog OP = new OpenFileDialog();
+            OP.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|GIF Image|*.gif|PNG Image|*png";
+            OP.Title = "Open an Image File";
+            OP.FilterIndex = 1;
+
+            if (OP.ShowDialog() != DialogResult.Cancel)
+            {
+                osnova.Load(OP.FileName);
+                osnova.AutoSize = true;
+            }
+        }
+
+
+       
         private void Osnova_MouseDown(object sender, MouseEventArgs e)
         {
             if (osnova.Image == null)
@@ -208,13 +307,17 @@ namespace Laborr_too
             Savepilti();
         }
         //---------------------------------New----------------
-        private void Newbtn_Click(object sender, EventArgs e)
+
+        public void Pojavlenie()
         {
             osnova.Location = new System.Drawing.Point(107, 34);
             osnova.Width = 950;
             osnova.Height = 551;
-            osnova.ImageLocation = (@"..\..\Pilti\fon.png");
-            this.Controls.Add(osnova);
+            osnova.BackColor = Color.Red;
+        }
+        private void Newbtn_Click(object sender, EventArgs e)
+        {
+            Pojavlenie();
             if (osnova.Image != null)
             {
                 var result = MessageBox.Show("Сохранить текущее изображение перед созданием нового рисунка?", "Предупреждение", MessageBoxButtons.YesNoCancel);
@@ -228,11 +331,7 @@ namespace Laborr_too
         }
         public void New_Click(object sender, EventArgs e)
         {
-            osnova.Location = new System.Drawing.Point(107, 34);
-            osnova.Width = 950;
-            osnova.Height = 551;
-            osnova.ImageLocation = (@"..\..\Pilti\fon.png");
-            this.Controls.Add(osnova);
+            Pojavlenie();
             if (osnova.Image != null)
             {
                 var result = MessageBox.Show("Сохранить текущее изображение перед созданием нового рисунка?", "Предупреждение", MessageBoxButtons.YesNoCancel);
@@ -248,6 +347,15 @@ namespace Laborr_too
         private void Form1_MouseMove1(object sender, MouseEventArgs e)
         {
             dljameshe.Text = e.X.ToString() + " " + e.Y.ToString();
+            if (drawing)
+            {
+                Graphics g = Graphics.FromImage(osnova.Image);
+                currentPath.AddLine(oldLocation, e.Location);
+                g.DrawPath(currentPen, currentPath);
+                oldLocation = e.Location;
+                g.Dispose();
+                osnova.Invalidate();
+            }
 
         }
         //-----------------------Exit----------------
@@ -259,13 +367,6 @@ namespace Laborr_too
         {
             Environment.Exit(0);
         }
-        //-------------------------------------------
-        public void Form1_MouseMove(object sender, MouseEventArgs e)
-        {
-            int CursorX = Cursor.Position.X;
-            int CursorY = Cursor.Position.Y;
 
-            dljameshe.Text = "X: " + CursorX.ToString() + "; Y: " + CursorY.ToString();
-        }
     }
 }
