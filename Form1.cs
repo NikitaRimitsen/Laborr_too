@@ -17,10 +17,14 @@ namespace Laborr_too
     {
         Label dljameshe = new Label();
         PictureBox osnova = new PictureBox();
+        TrackBar tudasuda = new TrackBar();
         bool drawing;
+        int historyCounter;
         GraphicsPath currentPath;
         Point oldLocation;
-        Pen currentPen;
+        public Pen currentPen;
+        Color historyColor;
+        List<Image> History;
 
 
         public Form1()
@@ -28,6 +32,7 @@ namespace Laborr_too
             InitializeComponent();
             drawing = false;
             currentPen = new Pen(Color.Black);
+            currentPen.Width = tudasuda.Value;
 
             MainMenu menu = new MainMenu();
             //-------------File---------------
@@ -37,14 +42,17 @@ namespace Laborr_too
             File.MenuItems.Add("Save", new EventHandler(Save_Click)).Shortcut = Shortcut.F2;
             File.MenuItems.Add("Exit", new EventHandler(Exit_Click)).Shortcut = Shortcut.CtrlX;
             MenuItem Edit = new MenuItem("Edit");
-            Edit.MenuItems.Add("Undo").Shortcut = Shortcut.CtrlZ;
-            Edit.MenuItems.Add("Reno").Shortcut = Shortcut.CtrlShiftZ;
+            Edit.MenuItems.Add("Undo", new EventHandler(Undo_Click)).Shortcut = Shortcut.CtrlZ;
+            Edit.MenuItems.Add("Redo", new EventHandler(Redo_Click)).Shortcut = Shortcut.CtrlShiftZ;
             MenuItem Pen = new MenuItem("Pen") { Checked = true };
             MenuItem Style = new MenuItem("Style") { Checked = true };
             MenuItem Color_ = new MenuItem("Color");
             MenuItem Solid = new MenuItem("Solid") { Checked = true };
+            Solid.Click += Solid_Click;
             MenuItem Dot = new MenuItem("Dot");
+            Dot.Click += Dot_Click;
             MenuItem DashDotHot = new MenuItem("DashDotHot");
+            DashDotHot.Click += DashDotHot_Click;
 
             MenuItem Help = new MenuItem("Help");
             Help.MenuItems.Add("About", new EventHandler(About_Click)).Shortcut = Shortcut.F1;
@@ -144,14 +152,15 @@ namespace Laborr_too
             nazad.Size = new System.Drawing.Size(1000, 600);
 
             //--------------TrackBar--------------
-            TrackBar tudasuda = new TrackBar();
+            
             tudasuda.Orientation = Orientation.Horizontal;
-            tudasuda.Minimum = 0;
-            tudasuda.Maximum = 100;
-            tudasuda.Value = 40;
+            tudasuda.Minimum = 1;
+            tudasuda.Maximum = 20;
+            tudasuda.Value = 5;
             tudasuda.Location = new System.Drawing.Point(750, 650);
             tudasuda.Width = 250;
             tudasuda.Height = 100;
+            tudasuda.Scroll += Tudasuda_Scroll;
 
             //---------------Label-----------------      
             dljameshe.Location = new System.Drawing.Point(150, 650);
@@ -163,18 +172,14 @@ namespace Laborr_too
 
             //----------------PictureBox--------------
             
-
-
-
-            //--------------------Bitmap---------------
+            //-------------Pamat_List<Image>----------
+            History = new List<Image>();
+            //--------------------Bitmap--------------
             Bitmap pic = new Bitmap(950, 551);
             osnova.Image = pic;
 
             //---------Forma-------
             this.Menu = menu;
-
-
-
 
             //this.Controls.Add(menu);
             this.Controls.Add(bokovoemenu);
@@ -198,12 +203,70 @@ namespace Laborr_too
 
         }
 
+        private void DashDotHot_Click(object sender, EventArgs e)
+        {
+            currentPen.DashStyle = DashStyle.DashDotDot;
+            MenuItem Solid = new MenuItem("Solid") { Checked = false };
+            MenuItem Dot = new MenuItem("Dot") { Checked = false };
+            MenuItem DashDotHot = new MenuItem("DashDotDot") { Checked = true };
+        }
+
+        private void Dot_Click(object sender, EventArgs e)
+        {
+            currentPen.DashStyle = DashStyle.Dot;
+            MenuItem Solid = new MenuItem("Solid") { Checked = false };
+            MenuItem Dot = new MenuItem("Dot") { Checked = true };
+            MenuItem DashDotHot = new MenuItem("DashDotDot") { Checked = false };
+        }
+
+        private void Solid_Click(object sender, EventArgs e)
+        {
+            currentPen.DashStyle = DashStyle.Solid;
+
+            MenuItem Solid= new MenuItem("Solid") { Checked = true };
+            MenuItem Dot = new MenuItem("Dot") { Checked = false };
+            MenuItem DashDotHot = new MenuItem("DashDotDot") { Checked = false };
+            //Solid.Checked = true;
+
+        }
+
+        //-------------------Undo_ja_Redo-----------------
+
+        private void Undo_Click(object sender, EventArgs e)
+        {
+            if (History.Count !=0 && historyCounter !=0)
+            {
+                osnova.Image = new Bitmap(History[--historyCounter]);
+            }
+            else MessageBox.Show("История пуста");
+        }
+
+        private void Redo_Click(object sender, EventArgs e)
+        {
+            if (historyCounter < History.Count - 1)
+            {
+                osnova.Image = new Bitmap(History[++historyCounter]);
+            }
+            else MessageBox.Show("История пуста");
+        }
+        //------------------------------------------------
+        private void Tudasuda_Scroll(object sender, EventArgs e)
+        {
+            currentPen.Width = tudasuda.Value;
+        }
+
         private void Osnova_MouseUp(object sender, MouseEventArgs e)
         {
+            History.RemoveRange(historyCounter + 1, History.Count - historyCounter - 1);
+            History.Add(new Bitmap(osnova.Image));
+            if (historyCounter + 1 < 10) historyCounter++;
+            if (History.Count - 1 == 10) History.RemoveAt(0);
             drawing = false;
             try
             {
+                //historyColor = Color.Yellow;
                 currentPath.Dispose();
+                currentPen.Color = historyColor;
             }
             catch { };
         }
@@ -214,12 +277,22 @@ namespace Laborr_too
             {
                 MessageBox.Show("Сначала создайте новый файл!");
             }
-            if (e.Button == MouseButtons.Left)
+            else if (e.Button == MouseButtons.Left)
             {
+                historyColor = currentPen.Color;
                 drawing = true;
                 oldLocation = e.Location;
                 currentPath = new GraphicsPath();
             }
+            else if (e.Button == MouseButtons.Right)
+            {
+                historyColor = currentPen.Color;
+                drawing = true;
+                currentPen.Color = Color.White;
+                oldLocation = e.Location;
+                currentPath = new GraphicsPath();
+            }
+
         }
 
         private void About_Click(object sender, EventArgs e)
@@ -259,11 +332,7 @@ namespace Laborr_too
        
         private void Osnova_MouseDown(object sender, MouseEventArgs e)
         {
-            if (osnova.Image == null)
-            {
-                MessageBox.Show("Сначала создайте новый файл!");
-                return;
-            }
+            
         }
 
         public void Savepilti()
@@ -310,10 +379,16 @@ namespace Laborr_too
 
         public void Pojavlenie()
         {
+            History.Clear();
+            historyCounter = 0;
             osnova.Location = new System.Drawing.Point(107, 34);
             osnova.Width = 950;
             osnova.Height = 551;
-            osnova.BackColor = Color.Red;
+            osnova.BackColor = Color.White;
+            Bitmap pic = new Bitmap(750, 500);
+            osnova.Image = pic;
+            History.Add(new Bitmap(osnova.Image));
+            
         }
         private void Newbtn_Click(object sender, EventArgs e)
         {
