@@ -15,6 +15,7 @@ namespace Laborr_too
 {
     public partial class Form1 : Form
     {
+        public Color color = Color.Black;
         Label dljameshe = new Label();
         PictureBox osnova = new PictureBox();
         TrackBar tudasuda = new TrackBar();
@@ -25,13 +26,13 @@ namespace Laborr_too
         public Pen currentPen;
         Color historyColor;
         List<Image> History;
-
+        //public object color;
 
         public Form1()
         {
             InitializeComponent();
             drawing = false;
-            currentPen = new Pen(Color.Black);
+            currentPen = new Pen(color);
             currentPen.Width = tudasuda.Value;
 
             MainMenu menu = new MainMenu();
@@ -47,6 +48,7 @@ namespace Laborr_too
             MenuItem Pen = new MenuItem("Pen") { Checked = true };
             MenuItem Style = new MenuItem("Style") { Checked = true };
             MenuItem Color_ = new MenuItem("Color");
+            Color_.Click += Color__Click;
             MenuItem Solid = new MenuItem("Solid") { Checked = true };
             Solid.Click += Solid_Click;
             MenuItem Dot = new MenuItem("Dot");
@@ -131,6 +133,7 @@ namespace Laborr_too
             ToolStripButton Colorbtn = new ToolStripButton();
             Colorbtn.Image = Image.FromFile(@"..\..\Pilti\Palitra.png");
             Colorbtn.Margin = new Padding(0, 0, 0, 30);
+            Colorbtn.Click += Colorbtn_Click;
             ToolStripButton Exitbtn = new ToolStripButton();
             Exitbtn.Image = Image.FromFile(@"..\..\Pilti\Vexod.png");
             Exitbtn.Margin = new Padding(0, 0, 0, 30);
@@ -201,6 +204,24 @@ namespace Laborr_too
             this.Height = 750;//свойство высота формы
             this.Width = 1200;
 
+        }
+
+        public void Cvet()
+        {
+            Varvid varvid = new Varvid(color);
+            varvid.Owner = this;
+            varvid.ShowDialog();
+            currentPen.Color = color;
+        }
+
+        private void Colorbtn_Click(object sender, EventArgs e)
+        {
+            Cvet();
+        }
+
+        private void Color__Click(object sender, EventArgs e)
+        {
+            Cvet();
         }
 
         private void DashDotHot_Click(object sender, EventArgs e)
